@@ -1,3 +1,7 @@
+let total = 0;
+let horde = [];
+let timer = 0;
+
 let gameState = {
 
   preload: function () {
@@ -22,24 +26,19 @@ let gameState = {
     this.physics.arcade.enable(this.player)
     this.player.collideWorldBounds = true;
     this.player.anchor.setTo(0.5, 0.5);
+    this.player.scale.setTo(.3)
     this.game.camera.follow(this.player);
 
-    //this zombie
-    var zombs = game.add.group();
-    for (var i = 0; i < 100; i++) {
-    this.zombie = zombs.create(game.world.randomX, game.world.randomY, 'zomb1');
-
-  };
-    this.physics.arcade.enable(this.zombie)
-    this.zombie.anchor.setTo(0.5, 0.5)
-
+  //  zombCreate();
+  //   this.zombie = game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1')
+  //   this.physics.arcade.enable(this.zombie)
+  //   this.zombie.anchor.setTo(0.5, 0.5)
   },
 
   update: function () {
 
-    ////////////////////////////////////// this.player.world.collideWorldBounds = true;
-    this.zombie.scale.setTo(.01)
-    this.player.scale.setTo(.3)
+    //////////////////////////////////////
+// console.log(game.timer.now)
     //player movement
     if(game.input.keyboard.isDown(Phaser.Keyboard.A)){
       // this.player.angle = -90
@@ -58,7 +57,12 @@ let gameState = {
       this.player.y += 4
     }
 
-    // this.game.physics.arcade.angleBetween(zombie, player)
+    for (var i = 0; i < horde.length; i++) {
+    horde[i].rotation = this.game.physics.arcade.angleBetween(horde[i], this.player);
+
+    horde[i].game.physics.arcade.moveToObject(horde[i], this.player)
+  }
+
 
     this.player.rotation = game.physics.arcade.angleToPointer(this.player);
 
@@ -84,7 +88,9 @@ let gameState = {
 
     // game.physics.arcade.moveToObject(zombie, player)
 
-
+    if(total < 200 && game.time.now > timer){
+      zombCreate();
+    }
 
   }
 ///////////////////////////////////////////
@@ -92,6 +98,16 @@ let gameState = {
   // render: function (){
   //   game.debug.cameraInfo(this.game.camera, 32, 32);
   // }
+}
+function zombCreate(){
+  this.zombie = game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1')
+  this.zombie.anchor.setTo(0.5, 0.5)
+  horde.push(this.zombie)
+  game.physics.arcade.enable(this.zombie)
+
+
+  total++
+  timer = game.time.now + 100;
 }
 
 const game = new Phaser.Game(800, 800, Phaser.AUTO)
