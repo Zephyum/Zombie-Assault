@@ -3,9 +3,10 @@ let gameState = {
   preload: function () {
     this.load.spritesheet('background', './assets/images/background.png', 662, 500, 1);
     this.load.spritesheet('player', './assets/images/sold1.png');
-    this.load.spritesheet('zombie', './assets/images/zomb1.png');
+    this.load.spritesheet('zomb1', './assets/images/zomb1.png');
 
   },
+
 
   create: function () {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -23,10 +24,44 @@ let gameState = {
     this.player.anchor.setTo(0.5, 0.5);
     this.game.camera.follow(this.player);
 
+    //this zombie
+    var zombs = game.add.group();
+    for (var i = 0; i < 100; i++) {
+    this.zombie = zombs.create(game.world.randomX, game.world.randomY, 'zomb1');
+
+  };
+    this.physics.arcade.enable(this.zombie)
+    this.zombie.anchor.setTo(0.5, 0.5)
+
   },
 
   update: function () {
-    // this.player.world.collideWorldBounds = true;
+
+    ////////////////////////////////////// this.player.world.collideWorldBounds = true;
+    this.zombie.scale.setTo(.01)
+    this.player.scale.setTo(.3)
+    //player movement
+    if(game.input.keyboard.isDown(Phaser.Keyboard.A)){
+      // this.player.angle = -90
+      this.player.x -= 4
+    }
+    else if(game.input.keyboard.isDown(Phaser.Keyboard.D)){
+      // this.player.angle = 90
+      this.player.x += 4
+    }
+    if(game.input.keyboard.isDown(Phaser.Keyboard.W)){
+      // this.player.angle = 0
+      this.player.y -= 4
+    }
+    else if(game.input.keyboard.isDown(Phaser.Keyboard.S)){
+      // this.player.angle = 0
+      this.player.y += 4
+    }
+
+    // this.game.physics.arcade.angleBetween(zombie, player)
+
+    this.player.rotation = game.physics.arcade.angleToPointer(this.player);
+
     if (this.player.x > 990) {
       this.player.x = 990,
       this.player.body.acceleration.x = 0;
@@ -47,28 +82,12 @@ let gameState = {
       this.player.body.acceleration.y = 0;
     }
 
-    this.player.scale.setTo(.3)
-    //player movement
-    if(game.input.keyboard.isDown(Phaser.Keyboard.A)){
-      // this.player.angle = -90
-      this.player.x -= 4
-    }
-    else if(game.input.keyboard.isDown(Phaser.Keyboard.D)){
-      // this.player.angle = 90
-      this.player.x += 4
-    }
-    if(game.input.keyboard.isDown(Phaser.Keyboard.W)){
-      // this.player.angle = 0
-      this.player.y -= 4
-    }
-    else if(game.input.keyboard.isDown(Phaser.Keyboard.S)){
-      // this.player.angle = 0
-      this.player.y += 4
-    }
-    this.player.rotation = game.physics.arcade.angleToPointer(this.player);
+    // game.physics.arcade.moveToObject(zombie, player)
+
+
+
   }
-
-
+///////////////////////////////////////////
 
   // render: function (){
   //   game.debug.cameraInfo(this.game.camera, 32, 32);
