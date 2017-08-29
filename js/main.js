@@ -1,6 +1,8 @@
 let total = 0;
 let horde = [];
 let timer = 0;
+var fireRate = 100;
+var nextFire = 0;
 
 let gameState = {
 
@@ -8,6 +10,7 @@ let gameState = {
     this.load.spritesheet('background', './assets/images/background.png', 662, 500, 1);
     this.load.spritesheet('player', './assets/images/sold1.png');
     this.load.spritesheet('zomb1', './assets/images/zomb1.png');
+    this.load.spritesheet('bullet', './assets/images/bullet.png')
 
   },
 
@@ -33,6 +36,18 @@ let gameState = {
   //   this.zombie = game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1')
   //   this.physics.arcade.enable(this.zombie)
   //   this.zombie.anchor.setTo(0.5, 0.5)
+
+  //bullets
+    weapon = game.add.weapon(30, 'bullet')
+    weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
+
+    weapon.bulletSpeed = 600;
+    weapon.fireRate = 100;
+
+    weapon.trackSprite(this.player, 0, 0, true);
+
+
+
   },
 
   update: function () {
@@ -92,6 +107,11 @@ let gameState = {
       zombCreate();
     }
 
+    //bullets
+    if(game.input.activePointer.isDown){
+      weapon.fire();
+    }
+
   }
 ///////////////////////////////////////////
 
@@ -109,6 +129,8 @@ function zombCreate(){
   total++
   timer = game.time.now + 100;
 }
+
+//bullets
 
 const game = new Phaser.Game(800, 800, Phaser.AUTO)
 
