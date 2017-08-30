@@ -113,7 +113,7 @@ let gameState = {
 
     // game.physics.arcade.moveToObject(zombie, player)
 
-    if(total < 1 && game.time.now > timer){
+    if(total < 200 && game.time.now > timer){
       ZombCreate();
     }
 
@@ -122,7 +122,15 @@ let gameState = {
       game.physics.arcade.enable(el);
       el.rotation = game.physics.arcade.angleBetween(el, player);
       game.physics.arcade.moveToObject(el, player, 100);
-      game.physics.arcade.overlap(bullet, el, zomDie);
+      bullets.forEach(function(bu) {
+        game.physics.arcade.overlap(bu, el, zomDie);
+
+      function zomDie() {
+        console.log('hit mf');
+        bu.kill()
+        el.kill()
+      }
+    })
     });
 
 
@@ -169,11 +177,11 @@ function fireBullet () {
     }
 }
 
-function zomDie() {
-  console.log('hit mf');
-  bullet.kill()
-  zombie.kill()
-}
+// function zomDie() {
+//   console.log('hit mf');
+//   bullet.kill()
+//   zombie.kill()
+// }
 
 
 const game = new Phaser.Game(800, 800, Phaser.AUTO)
