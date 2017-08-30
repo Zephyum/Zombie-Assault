@@ -6,6 +6,8 @@ var bullet;
 var bullets;
 var bulletTime = 0;
 var zombie;
+var lives = 5;
+var invincible = false;
 let gameState = {
 
   preload: function () {
@@ -24,7 +26,6 @@ let gameState = {
     bg = this.game.add.tileSprite(0, 0, 1919, 1919, 'background');
     this.game.world.setBounds(0, 0, 1000, 1000);
 
-    // bg.fixedToCamera = true;
 
     //this you
     player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'player');
@@ -34,21 +35,8 @@ let gameState = {
     player.anchor.setTo(0.5, 0.5);
     this.game.camera.follow(player);
     health: 200;
-    //////////////////////////////////////
-  //  zombCreate();
-  //   this.zombie = game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1')
-  //   this.physics.arcade.enable(this.zombie)
-  //   this.zombie.anchor.setTo(0.5, 0.5)
 
-  //bullets
-    // weapon = game.add.weapon(30, 'bullet')
-    // weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-    // ///////////////////////////////////
-    // weapon.bulletSpeed = 600;
-    // weapon.fireRate = 100;
-    //
-    // weapon.trackSprite(player, 0, 0, true);
-    // weapon.damage = 1000000;
+    //////////////////////////////////////
     bullets = game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -69,7 +57,6 @@ let gameState = {
   update: function () {
 
     //////////////////////////////////////
-// console.log(game.timer.now)
     //player movement
     if(game.input.keyboard.isDown(Phaser.Keyboard.A)){
       // player.angle = -90
@@ -111,9 +98,8 @@ let gameState = {
       player.body.acceleration.y = 0;
     }
 
-    // game.physics.arcade.moveToObject(zombie, player)
 
-    if(total < 200 && game.time.now > timer){
+    if(total < 2000 && game.time.now > timer){
       ZombCreate();
     }
 
@@ -124,12 +110,18 @@ let gameState = {
       game.physics.arcade.moveToObject(el, player, 100);
       bullets.forEach(function(bu) {
         game.physics.arcade.overlap(bu, el, zomDie);
+        if(invincible === false) {
+        game.physics.arcade.overlap(el, player, playerDie)
+      } else{
+        //do nothing
+      }
 
       function zomDie() {
         console.log('hit mf');
         bu.kill()
         el.kill()
       }
+
     })
     });
 
@@ -145,9 +137,6 @@ let gameState = {
   };
 ///////////////////////////////////////////
 
-  // render: function (){
-  //   game.debug.cameraInfo(this.game.camera, 32, 32);
-  // }
 
 function ZombCreate(){
   zombie = horde.add(game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1'))
@@ -177,14 +166,22 @@ function fireBullet () {
     }
 }
 
-// function zomDie() {
-//   console.log('hit mf');
-//   bullet.kill()
-//   zombie.kill()
-// }
+//player die
+function playerDie(){
+  lives --;
+  player.kill();
+  invincible = true;
+  game.time.events.add(2000, () => invincible = false);
+  console.log('you have ' + lives + ' left');
+  if (lives > 0) {
+     player.reset(game.world.randomX, game.world.randomY);
+  } else {
+
+  }
+}
 
 
-const game = new Phaser.Game(800, 800, Phaser.AUTO)
+const game = new Phaser.Game(1000, 700, Phaser.AUTO)
 
 game.state.add('gameState', gameState)
 game.state.start('gameState')
