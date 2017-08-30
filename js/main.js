@@ -6,8 +6,10 @@ var bullet;
 var bullets;
 var bulletTime = 0;
 var zombie;
-var lives = 5;
+var lives = 10;
 var invincible = false;
+var kills = 0;
+var killString = '';
 let gameState = {
 
   preload: function () {
@@ -25,7 +27,8 @@ let gameState = {
     //this background
     bg = this.game.add.tileSprite(0, 0, 1919, 1919, 'background');
     this.game.world.setBounds(0, 0, 1000, 1000);
-
+    killString = 'Zeds Dead : ';
+    killText = game.add.text(10, 10, killString + kills, { font: '34px Arial', fill: '#fff' });
 
     //this you
     player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'player');
@@ -117,9 +120,11 @@ let gameState = {
       }
 
       function zomDie() {
-        console.log('hit mf');
+        console.log('hit');
         bu.kill()
         el.kill()
+        kills++;
+        killText.text = killString + kills;
       }
 
     })
@@ -181,7 +186,7 @@ function playerDie(){
 }
 
 
-const game = new Phaser.Game(1000, 700, Phaser.AUTO)
+const game = new Phaser.Game(1000, 700, Phaser.AUTO, "gameDiv")
 
 game.state.add('gameState', gameState)
 game.state.start('gameState')
