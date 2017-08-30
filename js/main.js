@@ -1,11 +1,11 @@
 var player;
 let total = 0;
-let horde = [];
+var horde;
 let timer = 0;
 var bullet;
 var bullets;
 var bulletTime = 0;
-
+var zombie;
 let gameState = {
 
   preload: function () {
@@ -28,6 +28,7 @@ let gameState = {
 
     //this you
     player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'player');
+    player.enableBody = true;
     this.physics.arcade.enable(player)
     player.collideWorldBounds = true;
     player.anchor.setTo(0.5, 0.5);
@@ -54,8 +55,14 @@ let gameState = {
 
     bullets.createMultiple(40, 'bullet');
     bullets.setAll('anchor.x', 0.5);
-    bullets.setAll('anchor.y', 0.5)
+    bullets.setAll('anchor.y', 0.5);
 
+
+    horde = game.add.group();
+    horde.enableBody = true;
+    horde.physicsBodyType = Phaser.Physics.ARCADE;
+    horde.setAll('anchor.x', 0.5);
+    horde.setAll('anchor.y', 0.5);
 
   },
 
@@ -80,12 +87,6 @@ let gameState = {
       // player.angle = 0
       player.y += 4
     }
-
-    for (var i = 0; i < horde.length; i++) {
-    horde[i].rotation = this.game.physics.arcade.angleBetween(horde[i], player);
-
-    horde[i].game.physics.arcade.moveToObject(horde[i], player)
-  }
 
 
     player.rotation = game.physics.arcade.angleToPointer(player);
@@ -116,13 +117,20 @@ let gameState = {
       ZombCreate();
     }
 
+    horde.forEach(function(el) {
+      el.anchor.setTo(0.5, 0.5);
+      game.physics.arcade.enable(el);
+      el.rotation = game.physics.arcade.angleBetween(el, player);
+      game.physics.arcade.moveToObject(el, player, 100);
+      game.physics.arcade.overlap(bullet, el, zomDie);
+    });
+
+
 
     //bullets
     if(game.input.activePointer.isDown){
       fireBullet();
-      console.log(bullet.x, bullet.y)
       }
-
 
     } //update ends here
 
@@ -134,14 +142,11 @@ let gameState = {
   // }
 
 function ZombCreate(){
-  this.zombie = game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1')
-  this.zombie.anchor.setTo(0.5, 0.5)
-  this.zombie.health = 200;
-  horde.push(this.zombie)
-  game.physics.arcade.enable(this.zombie)
+  zombie = horde.add(game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1'))
 
   total++
-  timer = game.time.now + 100;
+  timer = game.time.now + 100
+
 }
 
 
@@ -159,9 +164,15 @@ function fireBullet () {
             bullet.rotation = player.rotation;
             game.physics.arcade.velocityFromRotation(player.rotation, 400, bullet.body.velocity);
             bulletTime = game.time.now + 50;
+            bullet.physicsBodyType = Phaser.Physics.ARCADE;
         }
     }
+}
 
+function zomDie() {
+  console.log('hit mf');
+  bullet.kill()
+  zombie.kill()
 }
 
 
