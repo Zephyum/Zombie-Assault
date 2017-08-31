@@ -12,6 +12,7 @@ var kills = 0;
 var killString = '';
 var lifeString = '';
 var lifeText = '';
+var stateText;
 let gameState = {
 
   preload: function () {
@@ -27,14 +28,21 @@ let gameState = {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     this.game.physics.enable('player', Phaser.Physics.ARCADE);
     //this background
-    bg = this.game.add.tileSprite(0, 0, 1919, 1919, 'background');
-    this.game.world.setBounds(0, 0, 1000, 1000);
+    bg = this.game.add.tileSprite(0, 0, 3000, 3000, 'background');
+    this.game.world.setBounds(0, 0, 2000, 2000);
+
     killString = 'Zeds Dead : ';
     killText = game.add.text(10, 10, killString + kills, { font: '34px Arial', fill: '#fff' });
     killText.fixedToCamera = true;
+
     lifeString = 'lives : ';
     lifeText = game.add.text(10, 40, lifeText + lives, { font: '34px Arial', fill: '#fff' });
     lifeText.fixedToCamera = true;
+
+    stateText = game.add.text(650, 450,' ', { font: '84px Arial', fill: '#fff' });
+    stateText.anchor.setTo(0.5, 0.5);
+    stateText.visible = false;
+    stateText.fixedToCamera = true;
 
 
     //this you
@@ -44,7 +52,6 @@ let gameState = {
     player.collideWorldBounds = true;
     player.anchor.setTo(0.5, 0.5);
     this.game.camera.follow(player);
-    health: 200;
 
     //////////////////////////////////////
     bullets = game.add.group();
@@ -88,8 +95,8 @@ let gameState = {
 
     player.rotation = game.physics.arcade.angleToPointer(player);
 
-    if (player.x > 990) {
-      player.x = 990,
+    if (player.x > 1990) {
+      player.x = 1990,
       player.body.acceleration.x = 0;
     }
 
@@ -98,8 +105,8 @@ let gameState = {
       player.body.acceleration.x = 0;
     }
 
-    if (player.y > 990) {
-      player.y = 990,
+    if (player.y > 1990) {
+      player.y = 1990,
       player.body.acceleration.y = 0;
     }
 
@@ -188,13 +195,28 @@ function playerDie(){
   if (lives > 0) {
      player.reset(game.world.randomX, game.world.randomY);
   } else {
-    
+    stateText.text = ' GAME OVER \n Click to try again!';
+    stateText.visible = true;
+
+    game.input.onTap.addOnce(restart, this);
   }
   lifeText.text = lifeString + lives;
 }
 
+function restart() {
+  horde.removeAll()
+  total = 0;
 
-const game = new Phaser.Game(1000, 700, Phaser.AUTO, "gameDiv")
+  player.reset();
+
+  stateText.visible = false;
+
+  lives = 10;
+  kills = 0;
+}
+
+
+const game = new Phaser.Game(1300, 700, Phaser.AUTO, "gameDiv")
 
 game.state.add('gameState', gameState)
 game.state.start('gameState')
