@@ -10,6 +10,8 @@ var lives = 10;
 var invincible = false;
 var kills = 0;
 var killString = '';
+var lifeString = '';
+var lifeText = '';
 let gameState = {
 
   preload: function () {
@@ -29,6 +31,11 @@ let gameState = {
     this.game.world.setBounds(0, 0, 1000, 1000);
     killString = 'Zeds Dead : ';
     killText = game.add.text(10, 10, killString + kills, { font: '34px Arial', fill: '#fff' });
+    killText.fixedToCamera = true;
+    lifeString = 'lives : ';
+    lifeText = game.add.text(10, 40, lifeText + lives, { font: '34px Arial', fill: '#fff' });
+    lifeText.fixedToCamera = true;
+
 
     //this you
     player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'player');
@@ -181,8 +188,9 @@ function playerDie(){
   if (lives > 0) {
      player.reset(game.world.randomX, game.world.randomY);
   } else {
-
+    
   }
+  lifeText.text = lifeString + lives;
 }
 
 
