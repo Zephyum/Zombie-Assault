@@ -20,6 +20,7 @@ let gameState = {
     this.load.spritesheet('player', './assets/images/sold1.png');
     this.load.spritesheet('zomb1', './assets/images/zomb1.png');
     this.load.spritesheet('bullet', './assets/images/bullet.png')
+    this.load.spritesheet('ken', './assets/images/ken.png')
 
   },
 
@@ -216,7 +217,7 @@ function restart() {
 }
 
 
-const game = new Phaser.Game(1300, 700, Phaser.AUTO, "gameDiv")
+// const game = new Phaser.Game(1300, 700, Phaser.AUTO, "gameDiv")
 
-game.state.add('gameState', gameState)
-game.state.start('gameState')
+// game.state.add('gameState', gameState)
+// game.state.start('gameState')

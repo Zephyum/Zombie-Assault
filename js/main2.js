@@ -1,238 +1,208 @@
+let kenState = {
 
-var gameProperties = {
-	screenWidth: window.innerWidth -40,
-	screenHeight: window.innerHeight -160,
+  preload: function () {
+    this.load.spritesheet('background', './assets/images/background.png', 662, 500, 1);
+    this.load.spritesheet('player', './assets/images/sold1.png');
+    this.load.spritesheet('zomb1', './assets/images/ken.png');
+    this.load.spritesheet('bullet', './assets/images/bullet.png')
+    this.load.spritesheet('ken', './assets/images/ken.png')
 
-	delayToStartLevel: 3,
-};
+  },
 
-var states = {
-	game: "game",
-};
 
-var graphicAssets = {
-	player: {URL:'assets/images/sold1.png', name:'player'},
-	bullet: {URL:'assets/images/bullet.png', name:'bullet'},
-  background: {URL: 'assets/images/background.png', name: 'background'},
-	zombie: {URL:'assets/images/zomb1.png', name: 'zombie'}
-};
+  create: function () {
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
+    this.game.physics.enable('player', Phaser.Physics.ARCADE);
+    //this background
+    bg = this.game.add.tileSprite(0, 0, 3000, 3000, 'background');
+    this.game.world.setBounds(0, 0, 2000, 2000);
 
-var PlayerProperties = {
-    startX: window.innerWidth * 0.5,
-    startY: window.innerHeight * 0.5,
-	  //  Phaser.physics.arcade.enable(this.player),
-	    startingLives: 5,
-	    timeToReset: 3,
-	    blinkDelay: 0.2,
-};
+    killString = 'Kens Dead : ';
+    killText = game.add.text(10, 10, killString + kills, { font: '34px Arial', fill: '#fff' });
+    killText.fixedToCamera = true;
 
-var bulletProperties = {
+    lifeString = 'lives : ';
+    lifeText = game.add.text(10, 40, lifeText + lives, { font: '34px Arial', fill: '#fff' });
+    lifeText.fixedToCamera = true;
+
+    stateText = game.add.text(650, 450,' ', { font: '84px Arial', fill: '#fff' });
+    stateText.anchor.setTo(0.5, 0.5);
+    stateText.visible = false;
+    stateText.fixedToCamera = true;
+
+
+    //this you
+    player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'player');
+    player.enableBody = true;
+    this.physics.arcade.enable(player)
+    player.collideWorldBounds = true;
+    player.anchor.setTo(0.5, 0.5);
+    this.game.camera.follow(player);
+
+    //////////////////////////////////////
+    bullets = game.add.group();
+    bullets.enableBody = true;
+    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+    bullets.createMultiple(40, 'bullet');
+    bullets.setAll('anchor.x', 0.5);
+    bullets.setAll('anchor.y', 0.5);
+
+
+    horde = game.add.group();
+    horde.enableBody = true;
+    horde.physicsBodyType = Phaser.Physics.ARCADE;
+    horde.setAll('anchor.x', 0.5);
+    horde.setAll('anchor.y', 0.5);
+
+  },
+
+  update: function () {
+
+    //////////////////////////////////////
+    //player movement
+    if(game.input.keyboard.isDown(Phaser.Keyboard.A)){
+      // player.angle = -90
+      player.x -= 4
+    }
+    else if(game.input.keyboard.isDown(Phaser.Keyboard.D)){
+      // player.angle = 90
+      player.x += 4
+    }
+    if(game.input.keyboard.isDown(Phaser.Keyboard.W)){
+      // player.angle = 0
+      player.y -= 4
+    }
+    else if(game.input.keyboard.isDown(Phaser.Keyboard.S)){
+      // player.angle = 0
+      player.y += 4
+    }
+
+
+    player.rotation = game.physics.arcade.angleToPointer(player);
+
+    if (player.x > 1990) {
+      player.x = 1990,
+      player.body.acceleration.x = 0;
+    }
+
+    if (player.x < 10) {
+      player.x = 10,
+      player.body.acceleration.x = 0;
+    }
+
+    if (player.y > 1990) {
+      player.y = 1990,
+      player.body.acceleration.y = 0;
+    }
+
+    if (player.y < 10) {
+      player.y = 10,
+      player.body.acceleration.y = 0;
+    }
+
+
+    if(total < 2000 && game.time.now > timer){
+      ZombCreate();
+    }
+
+    horde.forEach(function(el) {
+      el.anchor.setTo(0.5, 0.5);
+      game.physics.arcade.enable(el);
+      el.rotation = game.physics.arcade.angleBetween(el, player);
+      game.physics.arcade.moveToObject(el, player, 100);
+      bullets.forEach(function(bu) {
+        game.physics.arcade.overlap(bu, el, zomDie);
+        if(invincible === false) {
+        game.physics.arcade.overlap(el, player, playerDie)
+      } else{
+        //do nothing
+      }
+
+      function zomDie() {
+        console.log('hit');
+        bu.kill()
+        el.kill()
+        kills++;
+        killText.text = killString + kills;
+      }
+
+    })
+    });
+
+
+
+    //bullets
+    if(game.input.activePointer.isDown){
+      fireBullet();
+      }
+
+    } //update ends here
+
+  };
+///////////////////////////////////////////
+
+
+function ZombCreate(){
+  zombie = horde.add(game.add.sprite(game.world.randomX, game.world.randomY, 'zomb1'))
+
+  total++
+  timer = game.time.now + 100
+
 }
 
-var zombieProperties = {
-	startingZombies: 3,
-	maxZombie: 20,
-	incrementZombie: 2,
-};
 
-var fontAssets = {
-	counterFontStyle: {font: '20px Arial', fill: '#FFFFFF', align: 'center'},
-};
+//bullets
+function fireBullet () {
 
-var gameState = function (game){
-    this.PlayerSprite;
-    this.PlayerIsInvulnerable;
+    if (game.time.now > bulletTime)
+    {
+        bullet = bullets.getFirstExists(false);
 
-    this.key_left;
-    this.key_right;
-    this.key_thrust;
-    this.key_fire;
-
-    this.bulletGroup;
-    this.bulletInterval = 0;
-
-    this.zombieGroup;
-    this.zombiesCount= zombieProperties.startingZombie;
-
-    this.PlayerLives = PlayerProperties.startingLives;
-    this.tf_lives;
-
-    this.score = 0;
-    this.tf_score;
-
-    this.sndDestroyed;
-    this.sndFire;
-};
-
-gameState.prototype = {
-
-    preload: function () {
-      this.load.spritesheet('background', './assets/images/background.png', 662, 500, 1);
-      this.load.spritesheet('player', './assets/images/sold1.png');
-      this.load.spritesheet('zomb1', './assets/images/zomb1.png');
-      this.load.spritesheet('bullet', './assets/images/bullet.png');
-    },
-
-    create: function () {
-        this.initGraphics();
-        this.initPhysics();
-        this.initKeyboard();
-
-        weapon = game.add.weapon(30, 'bullet'),
-        weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
-
-        weapon.bulletSpeed = 600;
-        weapon.fireRate = 100;
-
-        weapon.trackSprite(this.player, 0, 0, true);
-    },
-
-    update: function () {
-        this.checkPlayerInput();
-        this.checkBoundaries(this.PlayerSprite);
-        this.bulletGroup.forEachExists(this.checkBoundaries, this);
-        this.zombieGroup.forEachExists(this.checkBoundaries, this);
-
-        game.physics.arcade.overlap(this.bulletGroup, this.zombieGroup, this.zombieCollision, null, this);
-        if (!this.PlayerIsInvulnerable) {
-        game.physics.arcade.overlap(this.PlayerSprite, this.zombieGroup, this.zombieCollision, null, this);
+        if (bullet)
+        {
+            bullet.reset(player.x, player.y);
+            bullet.lifespan = 2000;
+            bullet.rotation = player.rotation;
+            game.physics.arcade.velocityFromRotation(player.rotation, 400, bullet.body.velocity);
+            bulletTime = game.time.now + 50;
+            bullet.physicsBodyType = Phaser.Physics.ARCADE;
         }
-    },
-
-    initGraphics: function () {
-        this.PlayerSprite = game.add.sprite(PlayerProperties.startX, PlayerProperties.startY, 'player');
-        this.PlayerSprite.angle = -90;
-        this.PlayerSprite.anchor.set(0.5, 0.5);
-
-        this.bulletGroup = game.add.group();
-        this.zombieGroup = game.add.group();
-
-        this.tf_lives = game.add.text(20, 10, PlayerProperties.startingLives, fontAssets.counterFontStyle);
-
-        this.tf_score = game.add.text(gameProperties.screenWidth - 20, 10, "0", fontAssets.counterFontStyle);
-    	this.tf_score.align - 'right';
-    	this.tf_score.anchor.set(1,0);
-    },
-
-    initSounds: function () {
-    	this.sndDestroyed = game.add.audio(soundAssets.destroyed.name);
-    	this.sndFire = game.add.audio(soundAssets.fire.name);
-    },
-
-    initPhysics: function () {
-        game.physics.startSystem(Phaser.Physics.ARCADE);
-
-        game.physics.enable(this.PlayerSprite, Phaser.Physics.ARCADE);
-        this.PlayerSprite.body.drag.set(PlayerProperties.drag);
-        this.PlayerSprite.body.maxVelocity.set(PlayerProperties.maxVelocity);
-        this.zombieGroup.enableBody = true;
-        this.zombieGroup.physicsBodyType = Phaser.Physics.ARCADE;
-    },
-
-    initKeyboard: function () {
-        this.key_left = game.input.keyboard.addKey(Phaser.Keyboard.A);
-        this.key_right = game.input.keyboard.addKey(Phaser.Keyboard.D);
-        this.key_up = game.input.keyboard.addKey(Phaser.Keyboard.W);
-        this.key_down = game.input.keyboard.addKey(Phaser.Keyboard.S);
-        this.key_fire = game.input.activePointer.isDown;
-    },
-      console.log('movin' + game)
-    checkPlayerInput: function () {
-        if (this.key_left.isDown) {
-            this.PlayerSprite.body.x -= 4
-        }
-        if (this.key_right.isDown) {
-            this.PlayerSprite.body.x += 4
-        }
-        if (this.key_up){
-            this.PlayerSprite.body.y -= 4
-        }
-        if (this.key_down) {
-          this.PlayerSprite.body.y += 4
-        }
-        if (this.key_fire.isDown) {
-            weapon.fire();
-        }
-    },
-
-    checkBoundaries: function (sprite) {
-        if (sprite.x < 0) {
-            sprite.x = game.width;
-        } else if (sprite.x > game.width) {
-            sprite.x = 0;
-        }
-
-        if (sprite.y < 0) {
-            sprite.y = game.height;
-        } else if (sprite.y > game.height) {
-            sprite.y = game.height;
-        }
-    },
-
-    zombieCollision: function (target, zombie) {
-    	this.sndDestroyed.play();
-
-        target.kill();
-        zombie.kill();
-
-        if (target.key == graphicAssets.Player.name) {
-            this.destroyPlayer();
-        }
-
-        this.updateScore(zombieProperties[zombie.key].score);
-
-        if (!this.zombieGroup.countLiving() ) {
-        	game.time.events.add(Phaser.Timer.SECOND * gameProperties.delayToStartLevel, this.nextLevel, this);
-        }
-    },
-
-    destroyPlayer: function () {
-        this.PlayerLives --;
-        this.tf_lives.text = this.PlayerLives;
-
-        if (this.PlayerLives) {
-            game.time.events.add(Phaser.Timer.SECOND * PlayerProperties.timeToReset, this.resetShip, this);
-        }
-    },
-
-    resetPlayer: function () {
-        this.PlayerIsInvulnerable = true;
-        this.PlayerSprite.reset(PlayerProperties.startX, PlayerProperties.startY);
-        this.PlayerSprite.angle = -90;
-
-        game.time.events.add(Phaser.Timer.SECOND * PlayerProperties.timeToReset, this.PlayerReady, this);
-        game.time.events.repeat(Phaser.Timer.SECOND * PlayerProperties.blinkDelay, PlayerProperties.timeToReset / PlayerProperties.blinkDelay, this.PlayerBlink, this);
-    },
-
-    PlayerReady: function() {
-    	this.PlayerIsInvulnerable = false;
-    	this.PlayerSprite.visible = true;
-    },
-
-    PlayerBlink: function() {
-    	this.PlayerSprite.visible = !this.PlayerSprite.visible;
-    },
-
-    updateScore: function(score){
-    	this.score += score;
-    	this.tf_score.text = this.score;
-    },
-
-    nextLevel: function() {
-    	this.zombieGroup.removeAll(true);
-
-    	if (this.zombiesCount < zombieProperties.maxZombie) {
-    		this.zombiesCount += zombieProperties.incrementZombie;
-    	}
-
-    	this.resetZombie();
     }
-};
+}
 
-var game = new Phaser.Game(800, 800, Phaser.AUTO);
-game.state.add(states.game, gameState);
-game.state.start(states.game);
+//player die
+function playerDie(){
+  lives --;
+  player.kill();
+  invincible = true;
+  game.time.events.add(2000, () => invincible = false);
+  console.log('you have ' + lives + ' left');
+  if (lives > 0) {
+     player.reset(game.world.randomX, game.world.randomY);
+  } else {
+    stateText.text = ' GAME OVER \n Click to try again!';
+    stateText.visible = true;
+
+    game.input.onTap.addOnce(restart, this);
+  }
+  lifeText.text = lifeString + lives;
+}
+
+function restart() {
+  horde.removeAll()
+  total = 0;
+
+  player.reset();
+
+  stateText.visible = false;
+
+  lives = 10;
+  kills = 0;
+}
 
 
+// const game = new Phaser.Game(1300, 700, Phaser.AUTO, "gameDiv")
 
-//http://msrinteractive.com/blasteroids/
+// game.state.add('gameState', gameState)
+// game.state.start('gameState')
