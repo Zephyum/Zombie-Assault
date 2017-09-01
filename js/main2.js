@@ -7,7 +7,7 @@ let kenState = {
     this.load.spritesheet('zomb1', './assets/images/ken.png');
     this.load.spritesheet('bullet', './assets/images/bullet.png')
     this.load.spritesheet('ken', './assets/images/ken.png')
-    this.load.audio('kenow', './assets/images/kenow-1.m4a.m4a')
+    this.load.audio('kenow', './assets/images/kenow.mp3')
 
   },
 
@@ -115,6 +115,7 @@ let kenState = {
       game.physics.arcade.enable(el);
       el.rotation = game.physics.arcade.angleBetween(el, player);
       game.physics.arcade.moveToObject(el, player, 100);
+      game.physics.arcade.collide(el, horde);
       bullets.forEach(function(bu) {
         game.physics.arcade.overlap(bu, el, zomDie);
         if(invincible === false) {
