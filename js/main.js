@@ -6,13 +6,15 @@ var bullet;
 var bullets;
 var bulletTime = 0;
 var zombie;
-var lives = 10;
+var lives = 5;
 var invincible = false;
 var kills = 0;
 var killString = '';
 var lifeString = '';
 var lifeText = '';
 var stateText;
+var ded;
+var bg;
 let gameState = {
 
   preload: function () {
@@ -21,6 +23,8 @@ let gameState = {
     this.load.spritesheet('zomb1', './assets/images/zomb1.png');
     this.load.spritesheet('bullet', './assets/images/bullet.png')
     this.load.spritesheet('ken', './assets/images/ken.png')
+    this.load.audio('dead', './assets/images/fall.wav')
+    this.load.spritesheet('blood', './assets/images/blood2.png')
 
   },
 
@@ -70,6 +74,10 @@ let gameState = {
     horde.setAll('anchor.x', 0.5);
     horde.setAll('anchor.y', 0.5);
 
+
+    //sounds
+    // gameOver = game.add.audio('gameOver')
+    ded = game.add.audio('dead')
   },
 
   update: function () {
@@ -117,7 +125,7 @@ let gameState = {
     }
 
 
-    if(total < 2000 && game.time.now > timer){
+    if(total < 3000 && game.time.now > timer){
       ZombCreate();
     }
 
@@ -126,6 +134,7 @@ let gameState = {
       game.physics.arcade.enable(el);
       el.rotation = game.physics.arcade.angleBetween(el, player);
       game.physics.arcade.moveToObject(el, player, 100);
+      game.physics.arcade.collide(el, horde);
       bullets.forEach(function(bu) {
         game.physics.arcade.overlap(bu, el, zomDie);
         if(invincible === false) {
@@ -138,8 +147,13 @@ let gameState = {
         console.log('hit');
         bu.kill()
         el.kill()
+        ded.play();
         kills++;
         killText.text = killString + kills;
+        var blood = game.add.image(el.x, el.y, -1, 'blood')
+        game.world.sendToBack(blood)
+        game.world.sendToBack(bg)
+
       }
 
     })
@@ -195,11 +209,11 @@ function playerDie(){
   console.log('you have ' + lives + ' left');
   if (lives > 0) {
      player.reset(game.world.randomX, game.world.randomY);
-  } else {
+  } else if (lives === 0) {
     stateText.text = ' GAME OVER \n Click to try again!';
     stateText.visible = true;
-
     game.input.onTap.addOnce(restart, this);
+    // gameOver.play();
   }
   lifeText.text = lifeString + lives;
 }
@@ -212,7 +226,7 @@ function restart() {
 
   stateText.visible = false;
 
-  lives = 10;
+  lives = 5;
   kills = 0;
 }
 

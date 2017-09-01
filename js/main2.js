@@ -1,3 +1,4 @@
+var ow;
 let kenState = {
 
   preload: function () {
@@ -6,6 +7,7 @@ let kenState = {
     this.load.spritesheet('zomb1', './assets/images/ken.png');
     this.load.spritesheet('bullet', './assets/images/bullet.png')
     this.load.spritesheet('ken', './assets/images/ken.png')
+    this.load.audio('kenow', './assets/images/kenow-1.m4a.m4a')
 
   },
 
@@ -54,6 +56,8 @@ let kenState = {
     horde.physicsBodyType = Phaser.Physics.ARCADE;
     horde.setAll('anchor.x', 0.5);
     horde.setAll('anchor.y', 0.5);
+
+    ow = game.add.audio('kenow');
 
   },
 
@@ -123,6 +127,7 @@ let kenState = {
         console.log('hit');
         bu.kill()
         el.kill()
+        ow.play();
         kills++;
         killText.text = killString + kills;
       }
